@@ -1,15 +1,15 @@
 package huffman
 
 import (
+	"fmt"
 	"sort"
 )
 
 func max(i, j uint32) uint32 {
 	if i > j {
 		return i
-	} else {
-		return j
 	}
+	return j
 }
 
 type node struct {
@@ -20,6 +20,13 @@ type node struct {
 	one       *node
 }
 
+func (n node) String() string {
+	if n.one != nil && n.zero != nil {
+		return fmt.Sprint("{ \"letter\": \"", n.letter, "\", \"frequency\": ", n.frequency, ", \"depth\": ", n.depth, ", \"one\": ", *n.one, ", \"zero\": ", *n.zero, " }")
+	}
+	return fmt.Sprint("{ \"letter\": \"", n.letter, "\", \"frequency\": ", n.frequency, ", \"depth\": ", n.depth, " }")
+}
+
 type byFrequency []node
 
 func (b byFrequency) Len() int      { return len(b) }
@@ -27,9 +34,8 @@ func (b byFrequency) Swap(i, j int) { b[i], b[j] = b[j], b[i] }
 func (b byFrequency) Less(i, j int) bool {
 	if b[i].frequency == b[j].frequency {
 		return b[i].depth < b[j].depth
-	} else {
-		return b[i].frequency < b[j].frequency
 	}
+	return b[i].frequency < b[j].frequency
 }
 
 func createTree(input string) node {
