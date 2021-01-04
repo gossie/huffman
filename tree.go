@@ -38,7 +38,7 @@ func (b byFrequency) Less(i, j int) bool {
 	return b[i].frequency < b[j].frequency
 }
 
-func createTree(input string) node {
+func fromInput(input string) node {
 	counts := make(map[string]int)
 	for _, c := range input {
 		counts[string(c)] = counts[string(c)] + 1
@@ -47,7 +47,7 @@ func createTree(input string) node {
 	length := len(input)
 	nodes := make([]node, 0)
 	for k, v := range counts {
-		leaf := node{k, float32(v) / float32(length), 1, nil, nil}
+		leaf := node{k, float32(v) / float32(length), 0, nil, nil}
 		nodes = append(nodes, leaf)
 	}
 
@@ -58,4 +58,28 @@ func createTree(input string) node {
 	}
 
 	return nodes[0]
+}
+
+func fromMapping(mapping map[string][]bool) node {
+	root := node{"", 1.0, 0, nil, nil}
+	for letter, code := range mapping {
+		n := &root
+		for _, bit := range code {
+			if bit {
+				if n.one == nil {
+					n.one = &node{"", 0.0, 0, nil, nil}
+				}
+				n = n.one
+			} else {
+				if n.zero == nil {
+					n.zero = &node{"", 0.0, 0, nil, nil}
+				}
+				n = n.zero
+			}
+		}
+		n.letter = letter
+
+	}
+
+	return root
 }
