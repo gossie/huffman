@@ -11,9 +11,6 @@ type CompressionResult struct {
 	size  uint
 }
 
-// Size returns the number of bits.
-func (cr *CompressionResult) Size() uint { return cr.size }
-
 // CompressConcurrent takes a string and compresses it using Huffman code.
 func CompressConcurrent(input string) CompressionResult {
 	root := fromInput(input)
