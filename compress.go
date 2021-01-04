@@ -1,6 +1,10 @@
 package huffman
 
 import (
+	"bytes"
+	"encoding/gob"
+	"log"
+
 	"github.com/willf/bitset"
 )
 
@@ -11,13 +15,29 @@ type CompressionResult struct {
 	size  uint
 }
 
-// CompressConcurrent takes a string and compresses it using Huffman code.
-func CompressConcurrent(input string) CompressionResult {
+type exportFormat struct {
+	Data  []uint64
+	Table map[string][]bool
+	Size  uint
+}
+
+// Bytes returns a byte array representation.
+func (cr *CompressionResult) Bytes() []byte {
+	buf := bytes.Buffer{}
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(exportFormat{cr.data.Bytes(), cr.table, cr.size})
+	if err != nil {
+		log.Fatal(err)
+	}
+	return buf.Bytes()
+}
+
+func compressConcurrent(input string) CompressionResult {
 	root := fromInput(input)
 	mapping := letterCodeMapping(&root)
 	var data bitset.BitSet
-	letterChannel := make(chan string)
-	mappingChannel := make(chan []bool)
+	letterChannel := make(chan string, 100000)
+	mappingChannel := make(chan []bool, 100000)
 
 	go readLetter(letterChannel, input)
 	go mapLetter(letterChannel, mappingChannel, mapping)
@@ -35,8 +55,8 @@ func CompressConcurrent(input string) CompressionResult {
 	return CompressionResult{data, mapping, index}
 }
 
-// CompressSingle takes a string and compresses it using Huffman code.
-func CompressSingle(input string) CompressionResult {
+// Compress takes a string and compresses it using Huffman code.
+func Compress(input string) CompressionResult {
 	root := fromInput(input)
 	mapping := letterCodeMapping(&root)
 	var data bitset.BitSet
