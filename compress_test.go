@@ -21,7 +21,7 @@ func TestCompressions(t *testing.T) {
 
 func TestCompressAndDecompress(t *testing.T) {
 	compressed := CompressConcurrent("aabaabca")
-	decompressed := DecompressSingle(compressed)
+	decompressed := Decompress(compressed)
 	if decompressed != "aabaabca" {
 		t.Fatalf("decompressed = %v", decompressed)
 	}
