@@ -66,21 +66,6 @@ func fromInput(input string) node {
 	return nodes[0]
 }
 
-func getLetter(input string, letterChannel chan string) {
-	for _, c := range input {
-		letterChannel <- string(c)
-	}
-	close(letterChannel)
-}
-
-func createMap(letterChannel chan string, mapChannel chan map[string]int) {
-	counts := make(map[string]int)
-	for letter := range letterChannel {
-		counts[letter] = counts[letter] + 1
-	}
-	mapChannel <- counts
-}
-
 func fromMapping(mapping map[rune][]bool) node {
 	root := node{-1, 1.0, 0, nil, nil}
 	for letter, code := range mapping {
