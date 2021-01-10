@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"log"
+	"time"
 
 	"github.com/willf/bitset"
 )
@@ -11,13 +12,13 @@ import (
 // CompressionResult holds the compressed data and huffman tree.
 type CompressionResult struct {
 	data  bitset.BitSet
-	table map[string][]bool
+	table map[rune][]bool
 	size  uint
 }
 
 type exportFormat struct {
 	Data  []uint64
-	Table map[string][]bool
+	Table map[rune][]bool
 	Size  uint
 }
 
@@ -36,7 +37,7 @@ func compressConcurrent(input string) CompressionResult {
 	root := fromInput(input)
 	mapping := letterCodeMapping(&root)
 	var data bitset.BitSet
-	letterChannel := make(chan string, 100000)
+	letterChannel := make(chan rune, 100000)
 	mappingChannel := make(chan []bool, 100000)
 
 	go readLetter(letterChannel, input)
@@ -57,13 +58,21 @@ func compressConcurrent(input string) CompressionResult {
 
 // Compress takes a string and compresses it using Huffman code.
 func Compress(input string) CompressionResult {
+	startTree := time.Now()
 	root := fromInput(input)
+	endTree := time.Now()
+	log.Println("creating tree: ", endTree.UnixNano()-startTree.UnixNano())
+
+	startMapping := time.Now()
 	mapping := letterCodeMapping(&root)
+	endMapping := time.Now()
+	log.Println("creating mapping table: ", endMapping.UnixNano()-startMapping.UnixNano())
+
 	var data bitset.BitSet
 
 	var index uint = 0
 	for _, letter := range input {
-		for _, bit := range mapping[string(letter)] {
+		for _, bit := range mapping[letter] {
 			if bit {
 				data.Set(index)
 			}
@@ -73,29 +82,33 @@ func Compress(input string) CompressionResult {
 	return CompressionResult{data, mapping, index}
 }
 
-func readLetter(c chan string, input string) {
+func readLetter(c chan rune, input string) {
 	for _, letter := range input {
-		c <- string(letter)
+		c <- letter
 	}
 	close(c)
 }
 
-func mapLetter(in chan string, out chan []bool, mapping map[string][]bool) {
+func mapLetter(in chan rune, out chan []bool, mapping map[rune][]bool) {
 	for letter := range in {
 		out <- mapping[letter]
 	}
 	close(out)
 }
 
-func letterCodeMapping(root *node) map[string][]bool {
-	mapping := make(map[string][]bool)
-	toBeNamed(root, make([]bool, 0), mapping)
+func letterCodeMapping(root *node) map[rune][]bool {
+	mapping := make(map[rune][]bool)
+	toBeNamed(root, make([]bool, 0), &mapping)
 	return mapping
 }
 
-func toBeNamed(node *node, code []bool, mapping map[string][]bool) {
-	if node.letter != "" {
-		mapping[node.letter] = code
+func toBeNamed(node *node, code []bool, mapping *map[rune][]bool) {
+	if node.letter != -1 {
+		if len(code) > 0 {
+			(*mapping)[node.letter] = code
+		} else {
+			(*mapping)[node.letter] = append(code, true)
+		}
 	} else {
 		code1 := make([]bool, len(code))
 		code0 := make([]bool, len(code))
