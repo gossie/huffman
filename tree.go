@@ -20,6 +20,10 @@ type node struct {
 	one       *node
 }
 
+func (n *node) Leaf() bool {
+	return n.one == nil && n.zero == nil
+}
+
 func (n *node) String() string {
 	if n.one != nil && n.zero != nil {
 		return fmt.Sprint("{ \"letter\": \"", n.letter, "\", \"frequency\": ", n.frequency, ", \"depth\": ", n.depth, ", \"one\": ", *n.one, ", \"zero\": ", *n.zero, " }")

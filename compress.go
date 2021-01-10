@@ -103,7 +103,7 @@ func letterCodeMapping(root *node) map[rune][]bool {
 }
 
 func toBeNamed(node *node, code []bool, mapping *map[rune][]bool) {
-	if node.letter != -1 {
+	if node.Leaf() {
 		if len(code) > 0 {
 			(*mapping)[node.letter] = code
 		} else {

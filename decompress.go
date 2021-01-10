@@ -31,7 +31,7 @@ func Decompress(compressedContent []byte) string {
 			currentNode = *currentNode.zero
 		}
 
-		if currentNode.letter != -1 {
+		if currentNode.Leaf() {
 			text.WriteRune(currentNode.letter)
 			currentNode = root
 		}
