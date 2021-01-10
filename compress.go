@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"log"
-	"time"
 
 	"github.com/willf/bitset"
 )
@@ -58,15 +57,15 @@ func compressConcurrent(input string) CompressionResult {
 
 // Compress takes a string and compresses it using Huffman code.
 func Compress(input string) CompressionResult {
-	startTree := time.Now()
+	// startTree := time.Now()
 	root := fromInput(input)
-	endTree := time.Now()
-	log.Println("creating tree: ", endTree.UnixNano()-startTree.UnixNano())
+	// endTree := time.Now()
+	// log.Println("creating tree: ", endTree.UnixNano()-startTree.UnixNano())
 
-	startMapping := time.Now()
+	// startMapping := time.Now()
 	mapping := letterCodeMapping(&root)
-	endMapping := time.Now()
-	log.Println("creating mapping table: ", endMapping.UnixNano()-startMapping.UnixNano())
+	// endMapping := time.Now()
+	// log.Println("creating mapping table: ", endMapping.UnixNano()-startMapping.UnixNano())
 
 	var data bitset.BitSet
 
