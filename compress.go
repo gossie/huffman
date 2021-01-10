@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"encoding/gob"
 	"log"
-
-	"github.com/willf/bitset"
+	"time"
 )
 
 // CompressionResult holds the compressed data and huffman tree.
 type CompressionResult struct {
-	data  bitset.BitSet
+	data  bitset
 	table map[rune][]bool
 	size  uint
 }
@@ -25,7 +24,7 @@ type exportFormat struct {
 func (cr *CompressionResult) Bytes() []byte {
 	buf := bytes.Buffer{}
 	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(exportFormat{cr.data.Bytes(), cr.table, cr.size})
+	err := enc.Encode(exportFormat{cr.data.bytes(), cr.table, cr.size})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +34,7 @@ func (cr *CompressionResult) Bytes() []byte {
 func compressConcurrent(input string) CompressionResult {
 	root := fromInput(input)
 	mapping := letterCodeMapping(&root)
-	var data bitset.BitSet
+	var data bitset
 	letterChannel := make(chan rune, 100000)
 	mappingChannel := make(chan []bool, 100000)
 
@@ -46,7 +45,7 @@ func compressConcurrent(input string) CompressionResult {
 	for code := range mappingChannel {
 		for _, bit := range code {
 			if bit {
-				data.Set(index)
+				data.set(index)
 			}
 			index++
 		}
@@ -57,23 +56,23 @@ func compressConcurrent(input string) CompressionResult {
 
 // Compress takes a string and compresses it using Huffman code.
 func Compress(input string) CompressionResult {
-	// startTree := time.Now()
+	startTree := time.Now()
 	root := fromInput(input)
-	// endTree := time.Now()
-	// log.Println("creating tree: ", endTree.UnixNano()-startTree.UnixNano())
+	endTree := time.Now()
+	log.Println("creating tree: ", endTree.UnixNano()-startTree.UnixNano())
 
-	// startMapping := time.Now()
+	startMapping := time.Now()
 	mapping := letterCodeMapping(&root)
-	// endMapping := time.Now()
-	// log.Println("creating mapping table: ", endMapping.UnixNano()-startMapping.UnixNano())
+	endMapping := time.Now()
+	log.Println("creating mapping table: ", endMapping.UnixNano()-startMapping.UnixNano())
 
-	var data bitset.BitSet
+	var data bitset
 
 	var index uint = 0
 	for _, letter := range input {
 		for _, bit := range mapping[letter] {
 			if bit {
-				data.Set(index)
+				data.set(index)
 			}
 			index++
 		}
