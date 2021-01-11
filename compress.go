@@ -5,13 +5,11 @@ import (
 	"encoding/gob"
 	"log"
 	"time"
-
-	"github.com/gossie/bitset"
 )
 
 // CompressionResult holds the compressed data and huffman tree.
 type CompressionResult struct {
-	data  bitset.BitSet
+	data  BitSet
 	table map[rune][]bool
 	size  uint
 }
@@ -33,29 +31,6 @@ func (cr *CompressionResult) Bytes() []byte {
 	return buf.Bytes()
 }
 
-func compressConcurrent(input string) CompressionResult {
-	root := fromInput(input)
-	mapping := letterCodeMapping(&root)
-	var data bitset.BitSet
-	letterChannel := make(chan rune, 100000)
-	mappingChannel := make(chan []bool, 100000)
-
-	go readLetter(letterChannel, input)
-	go mapLetter(letterChannel, mappingChannel, mapping)
-
-	var index uint = 0
-	for code := range mappingChannel {
-		for _, bit := range code {
-			if bit {
-				data.Set(index)
-			}
-			index++
-		}
-	}
-
-	return CompressionResult{data, mapping, index}
-}
-
 // Compress takes a string and compresses it using Huffman code.
 func Compress(input string) CompressionResult {
 	startTree := time.Now()
@@ -68,7 +43,7 @@ func Compress(input string) CompressionResult {
 	endMapping := time.Now()
 	log.Println("creating mapping table: ", endMapping.UnixNano()-startMapping.UnixNano())
 
-	var data bitset.BitSet
+	var data BitSet
 
 	var index uint = 0
 	for _, letter := range input {
