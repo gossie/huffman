@@ -19,6 +19,36 @@ func TestBitset(t *testing.T) {
 	}
 }
 
+func TestBoundaries(t *testing.T) {
+	b := BitSet{}
+	b.Set(0)
+	b.Set(7)
+	if !b.IsSet(0) {
+		t.Fail()
+	}
+	if b.IsSet(1) {
+		t.Fail()
+	}
+	if b.IsSet(2) {
+		t.Fail()
+	}
+	if b.IsSet(3) {
+		t.Fail()
+	}
+	if b.IsSet(4) {
+		t.Fail()
+	}
+	if b.IsSet(5) {
+		t.Fail()
+	}
+	if b.IsSet(6) {
+		t.Fail()
+	}
+	if !b.IsSet(7) {
+		t.Fail()
+	}
+}
+
 func TestBitsetBiggerThan64Entries(t *testing.T) {
 	b := BitSet{}
 	b.Set(67)
