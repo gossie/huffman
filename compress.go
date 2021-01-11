@@ -5,11 +5,13 @@ import (
 	"encoding/gob"
 	"log"
 	"time"
+
+	"github.com/gossie/bitset"
 )
 
 // CompressionResult holds the compressed data and huffman tree.
 type CompressionResult struct {
-	data  bitset
+	data  bitset.BitSet
 	table map[rune][]bool
 	size  uint
 }
@@ -24,7 +26,7 @@ type exportFormat struct {
 func (cr *CompressionResult) Bytes() []byte {
 	buf := bytes.Buffer{}
 	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(exportFormat{cr.data.bytes(), cr.table, cr.size})
+	err := enc.Encode(exportFormat{cr.data.Bytes(), cr.table, cr.size})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,7 +36,7 @@ func (cr *CompressionResult) Bytes() []byte {
 func compressConcurrent(input string) CompressionResult {
 	root := fromInput(input)
 	mapping := letterCodeMapping(&root)
-	var data bitset
+	var data bitset.BitSet
 	letterChannel := make(chan rune, 100000)
 	mappingChannel := make(chan []bool, 100000)
 
@@ -45,7 +47,7 @@ func compressConcurrent(input string) CompressionResult {
 	for code := range mappingChannel {
 		for _, bit := range code {
 			if bit {
-				data.set(index)
+				data.Set(index)
 			}
 			index++
 		}
@@ -66,13 +68,13 @@ func Compress(input string) CompressionResult {
 	endMapping := time.Now()
 	log.Println("creating mapping table: ", endMapping.UnixNano()-startMapping.UnixNano())
 
-	var data bitset
+	var data bitset.BitSet
 
 	var index uint = 0
 	for _, letter := range input {
 		for _, bit := range mapping[letter] {
 			if bit {
-				data.set(index)
+				data.Set(index)
 			}
 			index++
 		}
