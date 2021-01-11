@@ -15,7 +15,7 @@ type CompressionResult struct {
 }
 
 type exportFormat struct {
-	Data  []uint64
+	Data  []byte
 	Table map[rune][]bool
 	Size  uint
 }
