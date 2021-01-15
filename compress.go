@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"log"
-	"time"
 )
 
 // CompressionResult holds the compressed data and huffman tree.
@@ -33,16 +32,10 @@ func (cr *CompressionResult) Bytes() []byte {
 
 // Compress takes a string and compresses it using Huffman code.
 func Compress(input string) CompressionResult {
-	startTree := time.Now()
-	root := fromInput(input)
-	endTree := time.Now()
-	log.Println("creating tree: ", endTree.UnixNano()-startTree.UnixNano())
+	return compressText(input, letterCodeMapping(fromInput(input)))
+}
 
-	startMapping := time.Now()
-	mapping := letterCodeMapping(&root)
-	endMapping := time.Now()
-	log.Println("creating mapping table: ", endMapping.UnixNano()-startMapping.UnixNano())
-
+func compressText(input string, mapping map[rune][]byte) CompressionResult {
 	var data BitSet
 
 	var index uint = 0
@@ -56,8 +49,7 @@ func Compress(input string) CompressionResult {
 			}
 		}
 	}
-	// fmt.Println("compressed: ", data)
-	// fmt.Println("mapping: ", mapping)
+
 	return CompressionResult{data, mapping, index}
 }
 

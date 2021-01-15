@@ -44,7 +44,7 @@ func (b byFrequency) Len() int           { return len(b) }
 func (b byFrequency) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b byFrequency) Less(i, j int) bool { return b[i].less(&b[j]) }
 
-func fromInput(input string) node {
+func fromInput(input string) *node {
 	counts := make(map[rune]int)
 	for _, c := range input {
 		counts[c] = counts[c] + 1
@@ -63,7 +63,7 @@ func fromInput(input string) node {
 		nodes = append(nodes[2:], newNode)
 	}
 
-	return nodes[0]
+	return &nodes[0]
 }
 
 func fromMapping(mapping map[rune][]byte) node {
