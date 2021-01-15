@@ -16,13 +16,12 @@ func (b BitSet) String() string {
 	stringBuilder := strings.Builder{}
 	for _, bytes := range b.data {
 		mask := byte(1)
-		for i := 0; i < 7; i++ {
-			if (bytes & mask) != 0 {
+		for i := 0; i < 8; i++ {
+			if (bytes & (mask << i)) != 0 {
 				stringBuilder.WriteString("1")
 			} else {
 				stringBuilder.WriteString("0")
 			}
-			mask = mask << 1
 		}
 	}
 	return stringBuilder.String()
