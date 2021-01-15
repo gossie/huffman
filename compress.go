@@ -10,13 +10,13 @@ import (
 // CompressionResult holds the compressed data and huffman tree.
 type CompressionResult struct {
 	data  BitSet
-	table map[rune][]bool
+	table map[rune][]byte
 	size  uint
 }
 
 type exportFormat struct {
 	Data  []byte
-	Table map[rune][]bool
+	Table map[rune][]byte
 	Size  uint
 }
 
@@ -47,51 +47,98 @@ func Compress(input string) CompressionResult {
 
 	var index uint = 0
 	for _, letter := range input {
-		for _, bit := range mapping[letter] {
-			if bit {
-				data.Set(index)
+		code := mapping[letter]
+		numberOfBits := code[len(mapping[letter])-1]
+		for _, bits := range code[:len(code)-1] {
+			if numberOfBits > 0 {
+				setBit(&data, bits, 1, index)
+				index++
+				numberOfBits--
 			}
-			index++
+
+			if numberOfBits > 0 {
+				setBit(&data, bits, 2, index)
+				index++
+				numberOfBits--
+			}
+
+			if numberOfBits > 0 {
+				setBit(&data, bits, 4, index)
+				index++
+				numberOfBits--
+			}
+
+			if numberOfBits > 0 {
+				setBit(&data, bits, 8, index)
+				index++
+				numberOfBits--
+			}
+
+			if numberOfBits > 0 {
+				setBit(&data, bits, 16, index)
+				index++
+				numberOfBits--
+			}
+
+			if numberOfBits > 0 {
+				setBit(&data, bits, 32, index)
+				index++
+				numberOfBits--
+			}
+
+			if numberOfBits > 0 {
+				setBit(&data, bits, 64, index)
+				index++
+				numberOfBits--
+			}
+
+			if numberOfBits > 0 {
+				setBit(&data, bits, 1<<7, index)
+				index++
+				numberOfBits--
+			}
 		}
 	}
+	// fmt.Println("compressed: ", data)
+	// fmt.Println("mapping: ", mapping)
 	return CompressionResult{data, mapping, index}
 }
 
-func readLetter(c chan rune, input string) {
-	for _, letter := range input {
-		c <- letter
+func setBit(data *BitSet, bits byte, mask byte, index uint) {
+	if (bits & mask) != 0 {
+		data.Set(index)
 	}
-	close(c)
 }
 
-func mapLetter(in chan rune, out chan []bool, mapping map[rune][]bool) {
-	for letter := range in {
-		out <- mapping[letter]
-	}
-	close(out)
-}
-
-func letterCodeMapping(root *node) map[rune][]bool {
-	mapping := make(map[rune][]bool)
-	toBeNamed(root, make([]bool, 0), &mapping)
+func letterCodeMapping(root *node) map[rune][]byte {
+	mapping := make(map[rune][]byte)
+	toBeNamed(root, make([]byte, 0), &mapping, 0)
 	return mapping
 }
 
-func toBeNamed(node *node, code []bool, mapping *map[rune][]bool) {
+func toBeNamed(node *node, code []byte, mapping *map[rune][]byte, numberOfBits byte) {
 	if node.Leaf() {
 		if len(code) > 0 {
-			(*mapping)[node.letter] = code
+			(*mapping)[node.letter] = append(code, numberOfBits)
 		} else {
-			(*mapping)[node.letter] = append(code, true)
+			(*mapping)[node.letter] = append(code, 1, 1)
 		}
 	} else {
-		code1 := make([]bool, len(code))
-		code0 := make([]bool, len(code))
+		code1 := make([]byte, len(code))
+		code0 := make([]byte, len(code))
 
 		copy(code1, code)
 		copy(code0, code)
 
-		toBeNamed(node.one, append(code1, true), mapping)
-		toBeNamed(node.zero, append(code0, false), mapping)
+		bitIndex := numberOfBits % 8
+		if bitIndex == 0 {
+			code1 = append(code1, 1)
+			code0 = append(code0, 0)
+		} else {
+			code1[len(code1)-1] |= (1 << bitIndex)
+		}
+
+		toBeNamed(node.one, code1, mapping, numberOfBits+1)
+		toBeNamed(node.zero, code0, mapping, numberOfBits+1)
 	}
 }

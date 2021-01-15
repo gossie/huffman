@@ -1,5 +1,7 @@
 package huffman
 
+import "strings"
+
 // BitSet is a bitset.
 type BitSet struct {
 	data []byte
@@ -8,6 +10,22 @@ type BitSet struct {
 // From creates a new bitset from the given slice.
 func From(data []byte) BitSet {
 	return BitSet{data: data}
+}
+
+func (b BitSet) String() string {
+	stringBuilder := strings.Builder{}
+	for _, bytes := range b.data {
+		mask := byte(1)
+		for i := 0; i < 7; i++ {
+			if (bytes & mask) != 0 {
+				stringBuilder.WriteString("1")
+			} else {
+				stringBuilder.WriteString("0")
+			}
+			mask = mask << 1
+		}
+	}
+	return stringBuilder.String()
 }
 
 // IsSet returns true if the bit at the given index is set.

@@ -66,21 +66,29 @@ func fromInput(input string) node {
 	return nodes[0]
 }
 
-func fromMapping(mapping map[rune][]bool) node {
+func fromMapping(mapping map[rune][]byte) node {
 	root := node{-1, 1.0, 0, nil, nil}
 	for letter, code := range mapping {
 		n := &root
-		for _, bit := range code {
-			if bit {
-				if n.one == nil {
-					n.one = &node{-1, 0.0, 0, nil, nil}
+		numberOfBits := code[len(code)-1]
+		for _, bit := range code[:len(code)-1] {
+			mask := byte(1)
+			for i := 0; i < 8; i++ {
+				if numberOfBits > 0 {
+					if (bit & mask) != 0 {
+						if n.one == nil {
+							n.one = &node{-1, 0.0, 0, nil, nil}
+						}
+						n = n.one
+					} else {
+						if n.zero == nil {
+							n.zero = &node{-1, 0.0, 0, nil, nil}
+						}
+						n = n.zero
+					}
+					numberOfBits--
 				}
-				n = n.one
-			} else {
-				if n.zero == nil {
-					n.zero = &node{-1, 0.0, 0, nil, nil}
-				}
-				n = n.zero
+				mask = mask << 1
 			}
 		}
 		n.letter = letter

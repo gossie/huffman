@@ -110,10 +110,10 @@ func TestFromInputMississippi(t *testing.T) {
 }
 
 func TestFromMapping(t *testing.T) {
-	mapping := make(map[rune][]bool)
-	mapping[stringToRune("a")] = []bool{true}
-	mapping[stringToRune("b")] = []bool{false, true}
-	mapping[stringToRune("c")] = []bool{false, false}
+	mapping := make(map[rune][]byte)
+	mapping[stringToRune("a")] = []byte{0b00000001, 1}
+	mapping[stringToRune("b")] = []byte{0b00000010, 2}
+	mapping[stringToRune("c")] = []byte{0b00000000, 2}
 
 	root := fromMapping(mapping)
 	if root.letter != -1 || root.frequency != 1.0 || root.one == nil || root.zero == nil {
