@@ -75,7 +75,7 @@ func fromMapping(mapping map[rune][]byte) node {
 			mask := byte(1)
 			for i := 0; i < 8; i++ {
 				if numberOfBits > 0 {
-					if (bit & mask) != 0 {
+					if (bit & (mask << i)) != 0 {
 						if n.one == nil {
 							n.one = &node{-1, 0.0, 0, nil, nil}
 						}
@@ -88,7 +88,6 @@ func fromMapping(mapping map[rune][]byte) node {
 					}
 					numberOfBits--
 				}
-				mask = mask << 1
 			}
 		}
 		n.letter = letter
