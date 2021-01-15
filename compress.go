@@ -73,11 +73,11 @@ func setBitIfNecessary(numberOfBits *byte, data *BitSet, bits byte, mask byte, i
 
 func letterCodeMapping(root *node) map[rune][]byte {
 	mapping := make(map[rune][]byte)
-	toBeNamed(root, make([]byte, 0), &mapping, 0)
+	traverseTree(root, make([]byte, 0), &mapping, 0)
 	return mapping
 }
 
-func toBeNamed(node *node, code []byte, mapping *map[rune][]byte, numberOfBits byte) {
+func traverseTree(node *node, code []byte, mapping *map[rune][]byte, numberOfBits byte) {
 	if node.Leaf() {
 		if len(code) > 0 {
 			(*mapping)[node.letter] = append(code, numberOfBits)
@@ -91,7 +91,7 @@ func toBeNamed(node *node, code []byte, mapping *map[rune][]byte, numberOfBits b
 		copy(code1, code)
 		copy(code0, code)
 
-		bitIndex := numberOfBits % 8
+		bitIndex := numberOfBits & 7
 		if bitIndex == 0 {
 			code1 = append(code1, 1)
 			code0 = append(code0, 0)
@@ -99,7 +99,7 @@ func toBeNamed(node *node, code []byte, mapping *map[rune][]byte, numberOfBits b
 			code1[len(code1)-1] |= (1 << bitIndex)
 		}
 
-		toBeNamed(node.one, code1, mapping, numberOfBits+1)
-		toBeNamed(node.zero, code0, mapping, numberOfBits+1)
+		traverseTree(node.one, code1, mapping, numberOfBits+1)
+		traverseTree(node.zero, code0, mapping, numberOfBits+1)
 	}
 }
