@@ -50,52 +50,9 @@ func Compress(input string) CompressionResult {
 		code := mapping[letter]
 		numberOfBits := code[len(mapping[letter])-1]
 		for _, bits := range code[:len(code)-1] {
-			if numberOfBits > 0 {
-				setBit(&data, bits, 1, index)
-				index++
-				numberOfBits--
-			}
-
-			if numberOfBits > 0 {
-				setBit(&data, bits, 2, index)
-				index++
-				numberOfBits--
-			}
-
-			if numberOfBits > 0 {
-				setBit(&data, bits, 4, index)
-				index++
-				numberOfBits--
-			}
-
-			if numberOfBits > 0 {
-				setBit(&data, bits, 8, index)
-				index++
-				numberOfBits--
-			}
-
-			if numberOfBits > 0 {
-				setBit(&data, bits, 16, index)
-				index++
-				numberOfBits--
-			}
-
-			if numberOfBits > 0 {
-				setBit(&data, bits, 32, index)
-				index++
-				numberOfBits--
-			}
-
-			if numberOfBits > 0 {
-				setBit(&data, bits, 64, index)
-				index++
-				numberOfBits--
-			}
-
-			if numberOfBits > 0 {
-				setBit(&data, bits, 1<<7, index)
-				index++
-				numberOfBits--
+			mask := byte(1)
+			for i := 0; i < 8; i++ {
+				setBitIfNecessary(&numberOfBits, &data, bits, mask<<i, &index)
 			}
 		}
 	}
@@ -104,9 +61,13 @@ func Compress(input string) CompressionResult {
 	return CompressionResult{data, mapping, index}
 }
 
-func setBit(data *BitSet, bits byte, mask byte, index uint) {
-	if (bits & mask) != 0 {
-		data.Set(index)
+func setBitIfNecessary(numberOfBits *byte, data *BitSet, bits byte, mask byte, index *uint) {
+	if *numberOfBits > 0 {
+		if (bits & mask) != 0 {
+			data.Set(*index)
+		}
+		*index++
+		*numberOfBits--
 	}
 }
 
