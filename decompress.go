@@ -5,6 +5,8 @@ import (
 	"encoding/gob"
 	"log"
 	"strings"
+
+	"github.com/gossie/bitset"
 )
 
 // Decompress decompresses the given data back into a string.
@@ -17,7 +19,7 @@ func Decompress(compressedContent []byte) string {
 		log.Fatal(err)
 	}
 
-	compressionResult := CompressionResult{From(exported.Data), exported.Table, exported.Size}
+	compressionResult := CompressionResult{bitset.From(exported.Data), exported.Table, exported.Size}
 
 	root := fromMapping(compressionResult.table)
 	currentNode := root

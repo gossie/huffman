@@ -91,7 +91,6 @@ func fromMapping(mapping map[rune][]byte) node {
 			}
 		}
 		n.letter = letter
-
 	}
 
 	return root

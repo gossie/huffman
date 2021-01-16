@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"encoding/gob"
 	"log"
+
+	"github.com/gossie/bitset"
 )
 
 // CompressionResult holds the compressed data and huffman tree.
 type CompressionResult struct {
-	data  BitSet
+	data  bitset.BitSet
 	table map[rune][]byte
 	size  uint
 }
@@ -36,7 +38,7 @@ func Compress(input string) CompressionResult {
 }
 
 func compressText(input string, mapping map[rune][]byte) CompressionResult {
-	var data BitSet
+	var data bitset.BitSet
 
 	var index uint = 0
 	for _, letter := range input {
@@ -53,7 +55,7 @@ func compressText(input string, mapping map[rune][]byte) CompressionResult {
 	return CompressionResult{data, mapping, index}
 }
 
-func setBitIfNecessary(numberOfBits *byte, data *BitSet, bits byte, mask byte, index *uint) {
+func setBitIfNecessary(numberOfBits *byte, data *bitset.BitSet, bits byte, mask byte, index *uint) {
 	if *numberOfBits > 0 {
 		if (bits & mask) != 0 {
 			data.Set(*index)
